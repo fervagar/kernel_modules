@@ -27,7 +27,7 @@
 
 /**
  *  This Kernel Module handles an interruption produced by a simple button, 
- *  connected to a GPIO. It is based on a Raspberry Pi 3, but it can be useful
+ *  connected to a GPIO. It is based on a Raspberry Pi 3, but it can work
  *  in other hardware. The user can set a flag through the file /proc/reboot_flag
  *  so for example:
  *      # echo 0 > /proc/reboot_flag  :: Disables the button functionality
@@ -116,7 +116,6 @@ static void set_green_led(bool state) {
         }
 }
 
-
 static void rb_disable_red_led(struct work_struct *work) {
         struct delayed_work *dw;
 
@@ -130,7 +129,6 @@ static void rb_disable_red_led(struct work_struct *work) {
         // Set the ws as free
         atomic_dec(&ws_in_use);
 }
-
 
 static void rb_perform_reboot(struct work_struct *work) {
         struct delayed_work *dw;
