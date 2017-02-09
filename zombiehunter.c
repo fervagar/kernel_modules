@@ -51,6 +51,11 @@ static int hunt_zombies(void *data){
 		for_each_process(p){
 			if(p->state == TASK_DEAD){
 				printk(KERN_INFO "Zombie Process Targeted => PID: %d; NAME: %s\n", p->pid, p->comm);
+				
+				/**
+				 *  This is only a POC. Actually, sending a SIGKILL to a zombie process
+				 *  is useless... ;)
+				 */
 				if ( (ret = send_sig_info(SIGKILL, &info, p)) == 0){
 					printk(KERN_INFO "Process %d killed :P\n", p->pid);
 				}
