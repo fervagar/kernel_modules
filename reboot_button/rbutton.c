@@ -27,7 +27,7 @@
 
 /**
  *  This Kernel Module handles an interruption produced by a simple button, 
- *  connected to a GPIO. It is based on a Raspberry Pi 3, but it can work
+ *  connected to a GPIO. It is based on a Raspberry Pi 3, but it can be useful
  *  in other hardware. The user can set a flag through the file /proc/reboot_flag
  *  so for example:
  *      # echo 0 > /proc/reboot_flag  :: Disables the button functionality
@@ -66,7 +66,7 @@ MODULE_DESCRIPTION(DESC);
 
 #define PROC_RB_FILENAME       "reboot_flag"
 
-#define REBOOT_DELAY            (5 * HZ)     // 5 seconds
+#define REBOOT_DELAY            (2 * HZ)     // 2 seconds
 
 static bool reboot_flag = true;
 static int irq_number = 0;
@@ -79,8 +79,22 @@ static struct proc_dir_entry *proc_entry;
 static ssize_t procfs_read(struct file *f, char __user *buf, size_t len, loff_t *off);
 static ssize_t procfs_write(struct file *f, const char __user *buf, size_t len, loff_t *off);
 
+/**
+ *  NOTE: This function is quite simple... but if we want to have a good, well written procfsread function
+ *  we will need to apply more logic. 
+ */
 static ssize_t procfs_read(struct file *f, char __user *buf, size_t len, loff_t *off) {
-        return 0;
+        static ssize_t written = 0;
+
+        if(written) {
+                return (written = 0);   // Stop reading
+        }
+
+        if((written = sprintf(buf, "%s\n", ((reboot_flag)? "Enabled" : "Disabled"))) <= 0) {
+                return -EFAULT;
+        }
+
+        return written;
 }
 
 static ssize_t procfs_write(struct file *f, const char __user *buf, size_t len, loff_t *off) {
@@ -88,12 +102,7 @@ static ssize_t procfs_write(struct file *f, const char __user *buf, size_t len, 
 
         if(len > 0) {
                 first_byte = (int) *buf;
-                if('1' == ((char) first_byte)) {
-                        reboot_flag = true;
-                }
-                else {
-                        reboot_flag = false;
-                }
+                reboot_flag = ('1' == ((char) first_byte));
         }
 
         return len;
