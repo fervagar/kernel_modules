@@ -147,7 +147,8 @@ static void rb_perform_reboot(struct work_struct *work) {
         // Disable green LED
         set_green_led(false);
 
-        kernel_restart(NULL);
+        //kernel_restart(NULL);
+        orderly_reboot();
 
         kfree(dw);              // Well, actually this is never reached
         atomic_dec(&ws_in_use); // Neither decrementing the 'ws_in_use'
